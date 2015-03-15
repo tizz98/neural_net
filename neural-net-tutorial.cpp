@@ -2,6 +2,10 @@
 
 #include <vector>
 
+class Neuron;
+
+typedef std::vector<Neuron> Layer;
+
 class Net
 {
 public:
@@ -11,6 +15,7 @@ public:
 	void getResults(std::vector<double> &resultVals) const;
 
 private:
+	std::vector<Layer> m_layers; //m_layers[layerNum][neuronNum]
 };
 
 int main()
