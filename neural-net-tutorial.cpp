@@ -243,7 +243,8 @@ Net::Net(const std::vector<unsigned> &topology)
 			m_layers.back().push_back(Neuron(numOutputs));
 			std::cout << "Made a Neuron!" << std::endl;
 		}
-		
+		// force the bias node's output value to 1.0. It's the last neuron created above
+		m_layers.back().back().setOutputVal(1.0);
 	}
 }
 
@@ -326,12 +327,12 @@ void Net::getResults(std::vector<double> &resultVals) const
 
 void showVectorVals(string label, vector<double> &v)
 {
-    cout << label << " ";
+    std::cout << label << " ";
     for (unsigned i = 0; i < v.size(); ++i) {
-        cout << v[i] << " ";
+        std::cout << v[i] << " ";
     }
 
-    cout << endl;
+    std::cout << std::endl;
 }
 
 int main()
