@@ -27,8 +27,11 @@ public:
 	void feedForward(const Layer &prevLayer);
 	void calcOutputGradients(double targetVal);
 	void calcHiddenGradients(const Layer &nextLayer);
+	void updateInputWeights(Layer &prevLayer);
 
 private:
+	static double eta; // [0..1] overall net training rate
+	static double alpha; // [0..1] multiplier of last weight change (momentum)
 	static double transferFunction(double x);
 	static double transferFunctionDerivative(double x);
 	static double randomWeight(void) { return rand() / double(RAND_MAX); }
@@ -99,6 +102,29 @@ double Neuron::sumDOW(const Layer &nextLayer) const
 	}
 
 	return sum;
+}
+
+void Neuron::updateInputWeights(Layer &prevLayer)
+{
+	// the weights to be updated are in the Connection container
+	// in the neurons in the preceeding layer
+
+	for (unsigned n = 0; n < prevLayer.size(); ++n) {
+		Neuron &neuron = prevLayer[n];
+		double oldDeltaWeight = neuron.m_outputWeights[m_myIndex].deltaWeight;
+
+		double newDeltaWeight =
+				// individual input, magnified by the gradient and train rate:
+				eta
+				* neuron.getOutputVal()
+				* m_gradient
+				// also add momentum = a fraction of the previous delta weight
+				+ alpha
+				* oldDeltaWeight;
+
+		neuron.m_outputWeights[m_myIndex].deltaWeight = newDeltaWeight;
+		neuron.m_outputWeights[m_myIndex].weight += newDeltaWeight;
+	}
 }
 
 // **************** class Net ****************
