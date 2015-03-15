@@ -26,11 +26,13 @@ public:
 	double getOutputVal(void) const { return m_outputVal };
 	void feedForward(const Layer &prevLayer);
 	void calcOutputGradients(double targetVal);
+	void calcHiddenGradients(const Layer &nextLayer);
 
 private:
 	static double transferFunction(double x);
 	static double transferFunctionDerivative(double x);
 	static double randomWeight(void) { return rand() / double(RAND_MAX); }
+	double sumDOW(const layerNum &nextLayer) const;
 	double m_outputVal;
 	std::vector<Connection> m_outputWeights;
 	unsigned m_myIndex;
@@ -78,6 +80,25 @@ void Neuron::calcOutputGradients(double targetVal)
 {
 	double delta = targetVal - m_outputVal;
 	m_gradient = delta * Neuron::transferFunctionDerivative(m_outputVal);
+}
+
+void Neuron::calcHiddenGradients(const Layer &nextLayer)
+{
+	double dow = sumDOW(nextLayer);
+	m_gradient = dow * Neuron::transferFunctionDerivative(m_outputVal);
+}
+
+double Neuron::sumDOW(const Layer &nextLayer) const
+{
+	double sum = 0.0;
+
+	// sum our contributions of the errors at the nodes we feed
+
+	for (unsigned n = 0; n < nextLayer.size() - 1; ++n) {
+		sum += m_outputWeights[n].weight * nextLayer[n].m_gradient;
+	}
+
+	return sum;
 }
 
 // **************** class Net ****************
