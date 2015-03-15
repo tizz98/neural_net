@@ -25,6 +25,7 @@ public:
 	void setOutputVal(double val) { m_outputVal = val };
 	double getOutputVal(void) const { return m_outputVal };
 	void feedForward(const Layer &prevLayer);
+	void calcOutputGradients(double targetVal);
 
 private:
 	static double transferFunction(double x);
@@ -33,6 +34,7 @@ private:
 	double m_outputVal;
 	std::vector<Connection> m_outputWeights;
 	unsigned m_myIndex;
+	double m_gradient;
 };
 
 Neuron::Neuron(unsigned numOutputs, unsigned myIndex)
@@ -70,6 +72,12 @@ double Neuron::transferFunctionDerivative(double x)
 {
 	// tanh derivative
 	return 1.0 - x * x;
+}
+
+void Neuron::calcOutputGradients(double targetVal)
+{
+	double delta = targetVal - m_outputVal;
+	m_gradient = delta * Neuron::transferFunctionDerivative(m_outputVal);
 }
 
 // **************** class Net ****************
