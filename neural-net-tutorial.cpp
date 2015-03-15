@@ -18,6 +18,20 @@ private:
 	std::vector<Layer> m_layers; //m_layers[layerNum][neuronNum]
 };
 
+Net::Net(const std::vector<unsigned> &topology)
+{
+	unsigned numLayers = topology.size();
+	for (unsigned layerNum = 0; layerNum < numLayers; ++layerNum) {
+		m_layers.push_back(Layer());
+
+		// we have made a new layer, now fill it with neurons and 
+		// add a bias neuron to the layer:
+		for (unsigned neuronNum = 0; neuronNum <= topology[layerNum]; ++neuronNum) {
+			m_layers.back().push_back(Neuron());
+		}
+	}
+}
+
 int main()
 {
 	// eg., {3, 2, 1}
