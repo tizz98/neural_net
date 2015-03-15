@@ -11,25 +11,25 @@
 class TrainingData
 {
 public:
-    TrainingData(const string filename);
+    TrainingData(const std::string filename);
     bool isEof(void) { return m_trainingDataFile.eof(); }
-    void getTopology(vector<unsigned> &topology);
+    void getTopology(std::vector<unsigned> &topology);
 
     // Returns the number of input values read from the file:
-    unsigned getNextInputs(vector<double> &inputVals);
-    unsigned getTargetOutputs(vector<double> &targetOutputVals);
+    unsigned getNextInputs(std::vector<double> &inputVals);
+    unsigned getTargetOutputs(std::vector<double> &targetOutputVals);
 
 private:
-    ifstream m_trainingDataFile;
+    std::ifstream m_trainingDataFile;
 };
 
-void TrainingData::getTopology(vector<unsigned> &topology)
+void TrainingData::getTopology(std::vector<unsigned> &topology)
 {
-    string line;
-    string label;
+    std::string line;
+    std::string label;
 
     getline(m_trainingDataFile, line);
-    stringstream ss(line);
+    std::stringstream ss(line);
     ss >> label;
     if (this->isEof() || label.compare("topology:") != 0) {
         abort();
@@ -44,20 +44,20 @@ void TrainingData::getTopology(vector<unsigned> &topology)
     return;
 }
 
-TrainingData::TrainingData(const string filename)
+TrainingData::TrainingData(const std::string filename)
 {
     m_trainingDataFile.open(filename.c_str());
 }
 
-unsigned TrainingData::getNextInputs(vector<double> &inputVals)
+unsigned TrainingData::getNextInputs(std::vector<double> &inputVals)
 {
     inputVals.clear();
 
-    string line;
+    std::string line;
     getline(m_trainingDataFile, line);
-    stringstream ss(line);
+    std::stringstream ss(line);
 
-    string label;
+    std::string label;
     ss>> label;
     if (label.compare("in:") == 0) {
         double oneValue;
@@ -69,15 +69,15 @@ unsigned TrainingData::getNextInputs(vector<double> &inputVals)
     return inputVals.size();
 }
 
-unsigned TrainingData::getTargetOutputs(vector<double> &targetOutputVals)
+unsigned TrainingData::getTargetOutputs(std::vector<double> &targetOutputVals)
 {
     targetOutputVals.clear();
 
-    string line;
+    std::string line;
     getline(m_trainingDataFile, line);
-    stringstream ss(line);
+    std::stringstream ss(line);
 
-    string label;
+    std::string label;
     ss>> label;
     if (label.compare("out:") == 0) {
         double oneValue;
@@ -105,8 +105,8 @@ class Neuron
 {
 public:
 	Neuron(unsigned numOutputs, unsigned myIndex);
-	void setOutputVal(double val) { m_outputVal = val };
-	double getOutputVal(void) const { return m_outputVal };
+	void setOutputVal(double val) { m_outputVal = val; };
+	double getOutputVal(void) const { return m_outputVal; };
 	void feedForward(const Layer &prevLayer);
 	void calcOutputGradients(double targetVal);
 	void calcHiddenGradients(const Layer &nextLayer);
@@ -118,7 +118,7 @@ private:
 	static double transferFunction(double x);
 	static double transferFunctionDerivative(double x);
 	static double randomWeight(void) { return rand() / double(RAND_MAX); }
-	double sumDOW(const layerNum &nextLayer) const;
+	double sumDOW(const Layer &nextLayer) const;
 	double m_outputVal;
 	std::vector<Connection> m_outputWeights;
 	unsigned m_myIndex;
@@ -222,6 +222,7 @@ public:
 	void feedForward(const std::vector<double> &inputVals);
 	void backProp(const std::vector<double> &targetVals);
 	void getResults(std::vector<double> &resultVals) const;
+	double getRecentAverageError(void) const { return m_recentAverageError; }
 
 private:
 	std::vector<Layer> m_layers; //m_layers[layerNum][neuronNum]
@@ -240,7 +241,7 @@ Net::Net(const std::vector<unsigned> &topology)
 		// we have made a new layer, now fill it with neurons and 
 		// add a bias neuron to the layer:
 		for (unsigned neuronNum = 0; neuronNum <= topology[layerNum]; ++neuronNum) {
-			m_layers.back().push_back(Neuron(numOutputs));
+			m_layers.back().push_back(Neuron(numOutputs, neuronNum));
 			std::cout << "Made a Neuron!" << std::endl;
 		}
 		// force the bias node's output value to 1.0. It's the last neuron created above
@@ -325,7 +326,7 @@ void Net::getResults(std::vector<double> &resultVals) const
 	}
 }
 
-void showVectorVals(string label, vector<double> &v)
+void showVectorVals(std::string label, std::vector<double> &v)
 {
     std::cout << label << " ";
     for (unsigned i = 0; i < v.size(); ++i) {
@@ -340,12 +341,12 @@ int main()
     TrainingData trainData("/tmp/trainingData.txt");
 
     // e.g., { 3, 2, 1 }
-    vector<unsigned> topology;
+    std::vector<unsigned> topology;
     trainData.getTopology(topology);
 
     Net myNet(topology);
 
-    vector<double> inputVals, targetVals, resultVals;
+    std::vector<double> inputVals, targetVals, resultVals;
     int trainingPass = 0;
 
     while (!trainData.isEof()) {
