@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
+#include <cmath>
 
 struct Connection
 {
@@ -57,6 +58,18 @@ void Neuron::feedForward(const Layer &prevLayer)
 	}
 
 	m_outputVal = Neuron::transferFunction(sum);
+}
+
+double Neuron::transferFunction(double x)
+{
+	// tanh - output range [-1...1]
+	return tanh(x);
+}
+
+double Neuron::transferFunctionDerivative(double x)
+{
+	// tanh derivative
+	return 1.0 - x * x;
 }
 
 // **************** class Net ****************
