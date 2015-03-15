@@ -31,7 +31,7 @@ public:
 
 private:
 	static double eta; // [0..1] overall net training rate
-	static double alpha; // [0..1] multiplier of last weight change (momentum)
+	static double alpha; // [0..n] multiplier of last weight change (momentum)
 	static double transferFunction(double x);
 	static double transferFunctionDerivative(double x);
 	static double randomWeight(void) { return rand() / double(RAND_MAX); }
@@ -41,6 +41,9 @@ private:
 	unsigned m_myIndex;
 	double m_gradient;
 };
+
+double Neuron::eta = 0.15; // overall net learning rate
+double Neuron::alpha = 0.5; // momentum, multiplier of last deltaWeight
 
 Neuron::Neuron(unsigned numOutputs, unsigned myIndex)
 {
@@ -135,7 +138,7 @@ public:
 	Net(const std::vector<unsigned> &topology);
 	void feedForward(const std::vector<double> &inputVals);
 	void backProp(const std::vector<double> &targetVals);
-	void getResults(std::vector<double> &resultVals) const {};
+	void getResults(std::vector<double> &resultVals) const;
 
 private:
 	std::vector<Layer> m_layers; //m_layers[layerNum][neuronNum]
@@ -224,6 +227,16 @@ void Net::backProp(const std::vector<double> &targetVals)
 		for (unsigned n = 0; n < layer.size() - 1; ++n) {
 			layer[n].updateInputWeights(prevLayer);
 		}
+	}
+}
+
+void Net::getResults(std::vector<double> &resultVals) const
+{
+	resultVals.clear();
+
+	for (unsigned n = 0; n < m_layers.back().size() - 1; ++n)
+	{
+		resultVals.push_back(m_layers.back()[n].getOutputVal());
 	}
 }
 
